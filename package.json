@@ -1,0 +1,17 @@
+{
+  "name": "nx-release-planner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scrape NotificationX Free + Pro releases and WP.org support stats for the current 10-day window, post a digest to Slack.",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/index.js",
+    "dry-run": "DRY_RUN=1 node --env-file-if-exists=.env src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}
