@@ -16,12 +16,6 @@ function fmtDate(d) {
   });
 }
 
-function cell(value, width) {
-  const str = (value ?? "").toString();
-  if (str.length >= width) return str.slice(0, width);
-  return str + " ".repeat(width - str.length);
-}
-
 export function buildPayload({ window: win, free, pro, support }) {
   const lastFree = free?.lastRelease
     ? `${fmtDate(free.lastRelease.date)} (v${free.lastRelease.version})`
@@ -33,7 +27,6 @@ export function buildPayload({ window: win, free, pro, support }) {
   const freeCount = free?.total ?? 0;
   const proCount = pro?.total ?? 0;
 
-  const totalSupport = support?.total ?? 0;
   const resolvedDisplay =
     support?.resolved === null || support?.resolved === undefined
       ? "*"
@@ -43,20 +36,31 @@ export function buildPayload({ window: win, free, pro, support }) {
       ? "*"
       : support.total.toString();
 
-  // Monospaced table — uses code block so columns line up in Slack.
-  const header = `${cell("Plugin", 8)} | ${cell("Last Release", 26)} | Releases in window`;
-  const sep = `${"-".repeat(8)} | ${"-".repeat(26)} | ${"-".repeat(19)}`;
-  const rowFree = `${cell("Free", 8)} | ${cell(lastFree, 26)} | ${freeCount}`;
-  const rowPro = `${cell("Pro", 8)} | ${cell(lastPro, 26)} | ${proCount}`;
-  const tableBlock = "```" + [header, sep, rowFree, rowPro].join("\n") + "```";
-
-  const supportLine =
-    `*Total support in org:* ${totalDisplay}   *Resolved:* ${resolvedDisplay}/${totalDisplay}`;
+  // We deliberately avoid a monospaced code block here because Slack does
+  // not soft-wrap inside ``` fences — wide tables stay one long line on
+  // mobile and either clip or scroll horizontally. Instead we use one
+  // section per plugin with bold labels + bullets, which stacks naturally
+  // on mobile while still reading as a clean table on desktop.
 
   const headerText = `Howdy Team! :wave:`;
   const subText =
     `Here's NotificationX development activity for *${win.pretty}* ` +
     `(last 10 days).`;
+
+  const freePluginBlock =
+    `:large_green_circle:  *Free Plugin*\n` +
+    `• Last release: *${lastFree}*\n` +
+    `• Releases in window: *${freeCount}*`;
+
+  const proPluginBlock =
+    `:large_purple_circle:  *Pro Plugin*\n` +
+    `• Last release: *${lastPro}*\n` +
+    `• Releases in window: *${proCount}*`;
+
+  const supportBlock =
+    `:speech_balloon:  *Support (org.wordpress.org)*\n` +
+    `• Total in window: *${totalDisplay}*\n` +
+    `• Resolved: *${resolvedDisplay}/${totalDisplay}*`;
 
   const blocks = [
     {
@@ -75,14 +79,10 @@ export function buildPayload({ window: win, free, pro, support }) {
       },
     },
     { type: "divider" },
-    {
-      type: "section",
-      text: { type: "mrkdwn", text: tableBlock },
-    },
-    {
-      type: "section",
-      text: { type: "mrkdwn", text: supportLine },
-    },
+    { type: "section", text: { type: "mrkdwn", text: freePluginBlock } },
+    { type: "section", text: { type: "mrkdwn", text: proPluginBlock } },
+    { type: "divider" },
+    { type: "section", text: { type: "mrkdwn", text: supportBlock } },
     { type: "divider" },
     {
       type: "actions",
