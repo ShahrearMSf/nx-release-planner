@@ -13,10 +13,12 @@ on:
       dry_run:
         description: "Print payload instead of posting to Slack"
         required: false
-        default: "false"
+        type: boolean
+        default: false
       run_date:
-        description: "Override 'today' (ISO date, e.g. 2026-05-20) for testing"
+        description: "Override 'today' (ISO date YYYY-MM-DD, e.g. 2026-05-31). Leave EMPTY for today."
         required: false
+        type: string
         default: ""
 
 jobs:
