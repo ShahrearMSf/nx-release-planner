@@ -4,7 +4,11 @@
 // The webhook accepts the standard `blocks` array plus a fallback `text`
 // (used by clients that don't render blocks, e.g. mobile push previews).
 
-import { FREE_PLUGIN_URL as FREE_URL, PRO_SITE_URL as PRO_URL } from "./config.js";
+import {
+  FREE_PLUGIN_URL as FREE_URL,
+  PRO_CHANGELOG_URL as PRO_URL,
+  SUPPORT_FORUM_URL as SUPPORT_URL,
+} from "./config.js";
 
 function fmtDate(d) {
   if (!d) return "—";
@@ -45,7 +49,7 @@ export function buildPayload({ window: win, free, pro, support }) {
   const headerText = `Howdy Team! :wave:`;
   const subText =
     `Here's NotificationX development activity for *${win.pretty}* ` +
-    `(last 10 days).`;
+    `— current dev cycle.`;
 
   const freePluginBlock =
     `:large_green_circle:  *Free Plugin*\n` +
@@ -58,7 +62,7 @@ export function buildPayload({ window: win, free, pro, support }) {
     `• Releases in window: *${proCount}*`;
 
   const supportBlock =
-    `:speech_balloon:  *Support (org.wordpress.org)*\n` +
+    `:speech_balloon:  *Support*\n` +
     `• Total in window: *${totalDisplay}*\n` +
     `• Resolved: *${resolvedDisplay}/${totalDisplay}*`;
 
@@ -82,7 +86,16 @@ export function buildPayload({ window: win, free, pro, support }) {
     { type: "section", text: { type: "mrkdwn", text: freePluginBlock } },
     { type: "section", text: { type: "mrkdwn", text: proPluginBlock } },
     { type: "divider" },
-    { type: "section", text: { type: "mrkdwn", text: supportBlock } },
+    {
+      type: "section",
+      text: { type: "mrkdwn", text: supportBlock },
+      accessory: {
+        type: "button",
+        text: { type: "plain_text", text: "Open Forum", emoji: true },
+        url: SUPPORT_URL,
+        action_id: "open_support_forum",
+      },
+    },
     { type: "divider" },
     {
       type: "actions",
