@@ -26,11 +26,22 @@ async function safe(label, fn) {
 }
 
 async function main() {
-  const now = process.env.RUN_DATE
-    ? new Date(process.env.RUN_DATE)
-    : new Date();
-  if (Number.isNaN(now.getTime())) {
-    throw new Error(`Invalid RUN_DATE: ${process.env.RUN_DATE}`);
+  // RUN_DATE must look like YYYY-MM-DD. Anything else (incl. accidental
+  // `true`/`false` from misused workflow inputs) is ignored with a warning
+  // so the run still goes through using today's date.
+  const raw = (process.env.RUN_DATE || "").trim();
+  let now;
+  if (raw === "") {
+    now = new Date();
+  } else if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    now = new Date(`${raw}T00:00:00Z`);
+    if (Number.isNaN(now.getTime())) {
+      log(`WARN: RUN_DATE "${raw}" parsed as Invalid Date — using today instead.`);
+      now = new Date();
+    }
+  } else {
+    log(`WARN: RUN_DATE "${raw}" doesn't match YYYY-MM-DD — using today instead.`);
+    now = new Date();
   }
 
   const win = computeWindow(now);
